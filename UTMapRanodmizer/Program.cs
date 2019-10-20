@@ -6,28 +6,26 @@ namespace UTMapRanodmizer
 {
 	internal class Program
 	{
-		private static Options cmdOptions;
-		private static IConfiguration config;
+		public static IConfiguration Config { get; set; }
+		public static Options CmdOptions { get; set; }
 
 		private static void Main(string[] args)
 		{
-			config = new ConfigurationBuilder()
+			Config = new ConfigurationBuilder()
 			.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
 			.Build();
 
 			Parser.Default.ParseArguments<Options>(args)
 				.WithParsed(o =>
 				{
-					cmdOptions = o;
+					CmdOptions = o;
 					if (o.Repeat)
 					{
-						Console.WriteLine($"Read value: {o.Repeat}");
-					}
-					else
-					{
-						Console.WriteLine($"Read value: {o.Repeat}");
+						Console.WriteLine($"Maps will may be repeated.");
 					}
 				});
+
+
 
 			Console.ReadLine();
 		}
