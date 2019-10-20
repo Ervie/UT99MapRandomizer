@@ -1,12 +1,26 @@
-﻿using System;
+﻿using CommandLine;
+using System;
 
 namespace UTMapRanodmizer
 {
-	class Program
+	internal class Program
 	{
-		static void Main(string[] args)
+		private static void Main(string[] args)
 		{
-			Console.WriteLine("Hello World!");
+			Parser.Default.ParseArguments<Options>(args)
+				.WithParsed(o =>
+				{
+					if (o.Repeat)
+					{
+						Console.WriteLine($"Read value: {o.Repeat}");
+					}
+					else
+					{
+						Console.WriteLine($"Read value: {o.Repeat}");
+					}
+				});
+
+			Console.ReadLine();
 		}
 	}
 }
