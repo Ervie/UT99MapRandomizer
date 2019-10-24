@@ -1,6 +1,9 @@
 ﻿using CommandLine;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace UTMapRanodmizer
 {
@@ -25,9 +28,29 @@ namespace UTMapRanodmizer
 					}
 				});
 
+			var availableMaps = LoadMapsNamesFromMapFolder();
 
+			var mapsFromCurrentRotation = LoadMapsFromCurrentRotation();
 
 			Console.ReadLine();
+		}
+
+		private static ICollection<string> LoadMapsNamesFromMapFolder()
+		{
+			return Directory
+				.GetFiles(Config["mapsCatalogPath"], "*.unr", SearchOption.AllDirectories)
+				.Select(map => Path.GetFileName(map))
+				.Where(mapName => mapName.StartsWith("DM"))
+				.ToList();
+		}
+
+		private static ICollection<string> LoadMapsFromCurrentRotation()
+		{
+			return File.ReadAllLines(Config["iniFilePath"])
+				.Where(line => line.StartsWith("Maps["))
+				.Select(line => line.Split('=')?[1])
+				.Where(mapName => mapName is {})
+				.ToList();
 		}
 	}
 }
