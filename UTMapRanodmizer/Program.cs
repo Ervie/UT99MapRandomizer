@@ -32,6 +32,8 @@ namespace UTMapRanodmizer
 
 			var mapsFromCurrentRotation = LoadMapsFromCurrentRotation();
 
+			var newRotation = SelectNewRotation(availableMaps, mapsFromCurrentRotation);
+
 			Console.ReadLine();
 		}
 
@@ -49,8 +51,31 @@ namespace UTMapRanodmizer
 			return File.ReadAllLines(Config["iniFilePath"])
 				.Where(line => line.StartsWith("Maps["))
 				.Select(line => line.Split('=')?[1])
-				.Where(mapName => mapName is {})
+				.Where(mapName => mapName is { })
 				.ToList();
+		}
+
+		private static ICollection<string> SelectNewRotation(ICollection<string> availableMaps, ICollection<string> oldRotation)
+		{
+			Random rng = new Random();
+			List<string> newRotation = new List<string>();
+
+			int maxPossibleMapCount = Math.Min(32, availableMaps.Count);
+
+			while (newRotation.Count < maxPossibleMapCount)
+			{
+				string selectedMap = availableMaps.ElementAt(rng.Next(0, availableMaps.Count));
+				newRotation.Add(selectedMap);
+				availableMaps.Remove(selectedMap);
+			}
+
+			return newRotation;
+		}
+
+		private static void SaveNewRotationToIniFile(ICollection<string> newRotation)
+		{
+			if (!(newRotation is { }) || !newRotation.Any())
+				return;
 		}
 	}
 }
