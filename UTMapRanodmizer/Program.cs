@@ -34,6 +34,10 @@ namespace UTMapRanodmizer
 
 			var newRotation = SelectNewRotation(availableMaps, mapsFromCurrentRotation);
 
+			SaveNewRotationToIniFile(newRotation);
+
+			
+
 			Console.ReadLine();
 		}
 
@@ -76,6 +80,23 @@ namespace UTMapRanodmizer
 		{
 			if (!(newRotation is { }) || !newRotation.Any())
 				return;
+
+			string[] configFileLines = File.ReadAllLines(Config["iniFilePath"]);
+
+			for (int i = 0; i < configFileLines.Length; i++)
+			{
+				if (configFileLines[i].StartsWith("Maps["))
+				{
+					configFileLines[i] = string.Concat(configFileLines[i].Split('=')[0], "=", newRotation.ElementAt(i % 32) ?? string.Empty);
+				}
+			}
+
+			File.WriteAllLines(Config["iniFilePath"], configFileLines);
+		}
+
+		private static void RestartUTServer()
+		{
+
 		}
 	}
 }
