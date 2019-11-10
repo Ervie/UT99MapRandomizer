@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -13,6 +14,9 @@ namespace UTMapRanodmizer
 		public static Options CmdOptions { get; set; }
 
 		private const string _mapsLinePrefix = "Maps[";
+		private const string _iniFileSubPath = "\\System\\UnrealTournament.ini";
+		private const string _mapsCatalogSubPath = "\\Maps";
+		private const string _utServerRestartCommand = "./ucc.init restart";
 		private const int _maxMapRotationSize = 32;
 
 		private static void Main(string[] args)
@@ -39,15 +43,13 @@ namespace UTMapRanodmizer
 
 			SaveNewRotationToIniFile(newRotation);
 
-			
-
-			Console.ReadLine();
+			RestartUTServer();
 		}
 
 		private static ICollection<string> LoadMapsNamesFromMapFolder()
 		{
 			return Directory
-				.GetFiles(Config["mapsCatalogPath"], "*.unr", SearchOption.AllDirectories)
+				.GetFiles(string.Concat(Config["UTfolderPath"], _mapsCatalogSubPath), "*.unr", SearchOption.AllDirectories)
 				.Select(map => Path.GetFileName(map))
 				.Where(mapName => mapName.StartsWith("DM"))
 				.ToList();
@@ -55,7 +57,7 @@ namespace UTMapRanodmizer
 
 		private static ICollection<string> LoadMapsFromCurrentRotation()
 		{
-			return File.ReadAllLines(Config["iniFilePath"])
+			return File.ReadAllLines(string.Concat(Config["UTfolderPath"], _iniFileSubPath))
 				.Where(line => line.StartsWith(_mapsLinePrefix))
 				.Select(line => line.Split('=')?[1])
 				.Where(mapName => mapName is { })
@@ -93,7 +95,7 @@ namespace UTMapRanodmizer
 			if (!(newRotation is { }) || !newRotation.Any())
 				return;
 
-			string[] configFileLines = File.ReadAllLines(Config["iniFilePath"]);
+			string[] configFileLines = File.ReadAllLines(string.Concat(Config["UTfolderPath"], _iniFileSubPath));
 
 			for (int i = 0; i < configFileLines.Length; i++)
 			{
@@ -108,7 +110,17 @@ namespace UTMapRanodmizer
 
 		private static void RestartUTServer()
 		{
-
+			using Process process = new Process()
+			{
+				StartInfo = new ProcessStartInfo
+				{
+					WindowStyle = ProcessWindowStyle.Hidden,
+					FileName = "/bin/bash",
+					Arguments = string.Concat(Config["UTfolderPath"], _utServerRestartCommand)
+				}
+			};
+			process.Start();
+			process.WaitForExit();
 		}
 	}
 }
