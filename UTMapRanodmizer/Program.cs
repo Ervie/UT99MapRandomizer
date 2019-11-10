@@ -14,9 +14,9 @@ namespace UTMapRanodmizer
 		public static Options CmdOptions { get; set; }
 
 		private const string _mapsLinePrefix = "Maps[";
-		private const string _iniFileSubPath = "\\System\\UnrealTournament.ini";
-		private const string _mapsCatalogSubPath = "\\Maps";
-		private const string _utServerRestartCommand = "./ucc.init restart";
+		private const string _iniFileSubPath = "/System/UnrealTournament.ini";
+		private const string _mapsCatalogSubPath = "/Maps";
+		private const string _utServerRestartCommand = "/./ucc.init restart";
 		private const int _maxMapRotationSize = 32;
 
 		private static void Main(string[] args)
@@ -105,7 +105,7 @@ namespace UTMapRanodmizer
 				}
 			}
 
-			File.WriteAllLines(Config["iniFilePath"], configFileLines);
+			File.WriteAllLines(string.Concat(Config["UTfolderPath"], _iniFileSubPath), configFileLines);
 		}
 
 		private static void RestartUTServer()
