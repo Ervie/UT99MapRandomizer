@@ -67,11 +67,20 @@ namespace UTMapRanodmizer
 			Random rng = new Random();
 			List<string> newRotation = new List<string>();
 
-			int maxPossibleMapCount = Math.Min(_maxMapRotationSize, availableMaps.Count);
+			int maxPossibleMapCount = CmdOptions.Repeat ?
+				Math.Min(_maxMapRotationSize, availableMaps.Count) :
+				Math.Min(_maxMapRotationSize, availableMaps.Count - oldRotation.Count);
 
-			while (newRotation.Count < maxPossibleMapCount)
+			while (newRotation.Count < maxPossibleMapCount && availableMaps.Any())
 			{
 				string selectedMap = availableMaps.ElementAt(rng.Next(0, availableMaps.Count));
+
+				if (newRotation.Contains(selectedMap))
+					continue;
+
+				if (!CmdOptions.Repeat && oldRotation.Contains(selectedMap))
+					continue;
+
 				newRotation.Add(selectedMap);
 				availableMaps.Remove(selectedMap);
 			}
