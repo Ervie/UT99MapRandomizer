@@ -12,6 +12,9 @@ namespace UTMapRanodmizer
 		public static IConfiguration Config { get; set; }
 		public static Options CmdOptions { get; set; }
 
+		private const string _mapsLinePrefix = "Maps[";
+		private const int _maxMapRotationSize = 32;
+
 		private static void Main(string[] args)
 		{
 			Config = new ConfigurationBuilder()
@@ -53,7 +56,7 @@ namespace UTMapRanodmizer
 		private static ICollection<string> LoadMapsFromCurrentRotation()
 		{
 			return File.ReadAllLines(Config["iniFilePath"])
-				.Where(line => line.StartsWith("Maps["))
+				.Where(line => line.StartsWith(_mapsLinePrefix))
 				.Select(line => line.Split('=')?[1])
 				.Where(mapName => mapName is { })
 				.ToList();
@@ -64,7 +67,7 @@ namespace UTMapRanodmizer
 			Random rng = new Random();
 			List<string> newRotation = new List<string>();
 
-			int maxPossibleMapCount = Math.Min(32, availableMaps.Count);
+			int maxPossibleMapCount = Math.Min(_maxMapRotationSize, availableMaps.Count);
 
 			while (newRotation.Count < maxPossibleMapCount)
 			{
@@ -85,9 +88,9 @@ namespace UTMapRanodmizer
 
 			for (int i = 0; i < configFileLines.Length; i++)
 			{
-				if (configFileLines[i].StartsWith("Maps["))
+				if (configFileLines[i].StartsWith(_mapsLinePrefix))
 				{
-					configFileLines[i] = string.Concat(configFileLines[i].Split('=')[0], "=", newRotation.ElementAt(i % 32) ?? string.Empty);
+					configFileLines[i] = string.Concat(configFileLines[i].Split('=')[0], "=", newRotation.ElementAt(i % _maxMapRotationSize) ?? string.Empty);
 				}
 			}
 
