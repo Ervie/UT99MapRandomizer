@@ -39,32 +39,38 @@ namespace UTMapRanodmizer
 
 			var mapsFromCurrentRotation = LoadMapsFromCurrentRotation();
 
-			var newRotation = SelectNewRotation(availableMaps, mapsFromCurrentRotation);
+			var mapsToExclude = LoadExcludedMapsList();
+
+			var newRotation = SelectNewRotation(availableMaps, mapsFromCurrentRotation, mapsFromCurrentRotation);
 
 			SaveNewRotationToIniFile(newRotation);
 
-			RestartUTServer();
+			//RestartUTServer();
 		}
 
 		private static ICollection<string> LoadMapsNamesFromMapFolder()
-		{
-			return Directory
+			=> Directory
 				.GetFiles(string.Concat(Config["UTfolderPath"], _mapsCatalogSubPath), "*.unr", SearchOption.AllDirectories)
 				.Select(map => Path.GetFileName(map))
 				.Where(mapName => mapName.StartsWith("DM"))
 				.ToList();
-		}
+		
 
-		private static ICollection<string> LoadMapsFromCurrentRotation()
-		{
-			return File.ReadAllLines(string.Concat(Config["UTfolderPath"], _iniFileSubPath))
+		private static ICollection<string> LoadMapsFromCurrentRotation() 
+			=> File
+				.ReadAllLines(string.Concat(Config["UTfolderPath"], _iniFileSubPath))
 				.Where(line => line.StartsWith(_mapsLinePrefix))
 				.Select(line => line.Split('=')?[1])
 				.Where(mapName => mapName is { })
 				.ToList();
-		}
 
-		private static ICollection<string> SelectNewRotation(ICollection<string> availableMaps, ICollection<string> oldRotation)
+		private static ICollection<string> LoadExcludedMapsList()
+			=> string.IsNullOrEmpty(CmdOptions.ExcludedMapsFilePath) ?
+				new List<string>() :
+				File.ReadAllLines(CmdOptions.ExcludedMapsFilePath)
+					.ToList();
+
+		private static ICollection<string> SelectNewRotation(ICollection<string> availableMaps, ICollection<string> oldRotation, ICollection<string> mapsToExclude)
 		{
 			Random rng = new Random();
 			List<string> newRotation = new List<string>();
@@ -81,6 +87,9 @@ namespace UTMapRanodmizer
 					continue;
 
 				if (!CmdOptions.Repeat && oldRotation.Contains(selectedMap))
+					continue;
+
+				if (mapsToExclude.Contains(selectedMap))
 					continue;
 
 				newRotation.Add(selectedMap);
