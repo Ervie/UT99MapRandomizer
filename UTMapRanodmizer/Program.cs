@@ -45,7 +45,7 @@ namespace UTMapRanodmizer
 
 			SaveNewRotationToIniFile(newRotation);
 
-			//RestartUTServer();
+			RestartUTServer();
 		}
 
 		private static ICollection<string> LoadMapsNamesFromMapFolder()
